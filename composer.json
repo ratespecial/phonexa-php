@@ -1,0 +1,56 @@
+{
+    "name": "ratespecial/phonexa",
+    "type": "library",
+    "description": "API library to interact with the Phonexa ping-tree platform",
+    "homepage": "https://github.com/ratespecial/phonexa-php",
+    "support": {
+        "issues": "https://github.com/ratespecial/phonexa-php/issues"
+    },
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Karl Pierce",
+            "email": "kpierce@ratespecial.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {
+        "php": "^8.4",
+        "ext-json": "*",
+        "saloonphp/saloon": "^4.0"
+    },
+    "require-dev": {
+        "illuminate/support": "^12.12",
+        "laravel/pint": "^1.0",
+        "phpstan/phpstan": "^2.2.2",
+        "phpunit/phpunit": "~11",
+        "vlucas/phpdotenv": "^5"
+    },
+    "autoload": {
+        "psr-4": {
+            "Ratespecial\\Phonexa\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Ratespecial\\Phonexa\\": "tests/"
+        }
+    },
+    "scripts": {
+        "qa": ["@fix-style", "@test", "@phpstan"],
+        "test": "phpunit",
+        "check-style": "pint --test",
+        "fix-style": "pint",
+        "phpstan": "phpstan analyse --memory-limit=512M"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Ratespecial\\Phonexa\\ServiceProvider\\PhonexaServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}

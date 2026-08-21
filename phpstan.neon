@@ -1,0 +1,11 @@
+parameters:
+	level: 5
+
+	paths:
+		- src
+		- tests
+
+	# Lead deliberately holds arbitrary ad-hoc fields via __get/__set, because Phonexa's
+	# non-system field set differs per product and cannot be declared up front.
+	universalObjectCratesClasses:
+		- Ratespecial\Phonexa\LmsSync\Models\Lead

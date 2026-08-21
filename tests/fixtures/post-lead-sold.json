@@ -1,0 +1,7 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": "{\"lead_id\":\"W_O0QO\",\"status\":1,\"status_text\":\"sold\",\"redirect_url\":\"https://leads-inst1-client.phonexa.com/redirect?id=W_O0QO\",\"price\":\"1.0000\",\"timestamp\":1464879427.2253,\"processing_time\":0.0475}"
+}

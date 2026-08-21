@@ -1,0 +1,7 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": "{\"status\":1,\"status_text\":\"sold\",\"redirect_url\":\"https://leads-inst1-client.phonexa.com/redirect?id=W_O0QO\"}"
+}
