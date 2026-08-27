@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace Ratespecial\Phonexa\LmsSync;
 
-use Exception;
 use Ratespecial\Phonexa\Exceptions\PhonexaException;
 use Ratespecial\Phonexa\LmsSync\Auth\CredentialsAuthenticator;
 use Ratespecial\Phonexa\LmsSync\Requests\PostLead;
@@ -90,12 +89,12 @@ class LmsSyncConnector extends Connector
         ];
     }
 
+    /**
+     * Credentials are optional here: a lead may carry its own pair, and the authenticator only
+     * rejects a request that ends up with neither the connector's nor its own.
+     */
     protected function defaultAuth(): CredentialsAuthenticator
     {
-        if (empty($this->apiId) || empty($this->apiPassword)) {
-            throw new Exception('An API ID and API password are required');
-        }
-
         return new CredentialsAuthenticator($this->apiId, $this->apiPassword);
     }
 

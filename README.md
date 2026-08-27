@@ -115,6 +115,10 @@ $lead->apiId = 'other-account-id';
 $lead->apiPassword = 'other-account-password';
 ```
 
+The connector may also be built with no credentials at all, in which case every lead must
+carry its own pair. A request is only rejected when neither the connector nor the lead
+supplies an API ID and password.
+
 ### Using your own model
 
 `Lead` is a convenience, not a requirement. Anything implementing `ProvidesLeadData` can be

@@ -171,6 +171,60 @@ class LmsSyncConnectorTest extends TestCase
         $connector->send(new CheckLeadStatus('W_O0QO'));
     }
 
+    public function testLeadCredentialsAreUsedWhenTheConnectorHasNone(): void
+    {
+        $this->mock = new MockClient([
+            MockResponse::make(['status' => 1, 'status_text' => 'sold'], 200),
+        ]);
+
+        $connector = new LmsSyncConnector('https://leads.phonexa.test', '', '');
+        $connector->withMockClient($this->mock);
+
+        $lead              = new Lead();
+        $lead->apiId       = 'LEAD_ACCOUNT';
+        $lead->apiPassword = 'lead-secret';
+
+        $connector->send(new PostLead($lead));
+
+        $body = $this->sentBody();
+
+        $this->assertSame('LEAD_ACCOUNT', $body['apiId']);
+        $this->assertSame('lead-secret', $body['apiPassword']);
+    }
+
+    public function testLeadSuppliesOnlyTheHalfTheConnectorIsMissing(): void
+    {
+        $this->mock = new MockClient([
+            MockResponse::make(['status' => 1, 'status_text' => 'sold'], 200),
+        ]);
+
+        $connector = new LmsSyncConnector('https://leads.phonexa.test', 'api-id', '');
+        $connector->withMockClient($this->mock);
+
+        $lead              = new Lead();
+        $lead->apiPassword = 'lead-secret';
+
+        $connector->send(new PostLead($lead));
+
+        $body = $this->sentBody();
+
+        $this->assertSame('api-id', $body['apiId']);
+        $this->assertSame('lead-secret', $body['apiPassword']);
+    }
+
+    public function testALeadWithHalfACredentialPairIsStillRejected(): void
+    {
+        $connector = new LmsSyncConnector('https://leads.phonexa.test', '', '');
+        $connector->withMockClient(new MockClient([MockResponse::make([], 200)]));
+
+        $lead        = new Lead();
+        $lead->apiId = 'LEAD_ACCOUNT';
+
+        $this->expectExceptionMessage('An API ID and API password are required');
+
+        $connector->send(new PostLead($lead));
+    }
+
     private function connectorWithSoldMock(): LmsSyncConnector
     {
         $this->mock = new MockClient([
