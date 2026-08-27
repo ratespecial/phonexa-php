@@ -16,6 +16,7 @@ use Saloon\Http\Response;
 use Saloon\Repositories\Body\ArrayBodyRepository;
 use Saloon\Traits\Plugins\AcceptsJson;
 use Saloon\Traits\Plugins\AlwaysThrowOnErrors;
+use Saloon\Traits\Plugins\HasTimeout;
 use Throwable;
 
 /**
@@ -28,6 +29,14 @@ class LmsSyncConnector extends Connector
 {
     use AcceptsJson;
     use AlwaysThrowOnErrors;
+    use HasTimeout;
+
+    /**
+     * @var int Phonexa's own integration examples allow 120s; lead auctions really can run that long.
+     */
+    protected int $requestTimeout = 120;
+
+    protected int $connectTimeout = 10;
 
     public ?int $tries = 3;
 
@@ -74,18 +83,6 @@ class LmsSyncConnector extends Connector
 
         return [
             'User-Agent' => $userAgent,
-        ];
-    }
-
-    /**
-     * @return array<string, mixed>
-     */
-    protected function defaultConfig(): array
-    {
-        return [
-            // Phonexa's own integration examples allow 120s; lead auctions really can run that long.
-            'timeout'         => 120,
-            'connect_timeout' => 10,
         ];
     }
 
