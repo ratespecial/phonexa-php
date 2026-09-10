@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Ratespecial\Phonexa\LmsSync\Models;
 
+use JsonSerializable;
 use Ratespecial\Phonexa\LmsSync\Contracts\ProvidesLeadData;
 
 /**
@@ -17,8 +18,13 @@ use Ratespecial\Phonexa\LmsSync\Contracts\ProvidesLeadData;
  * Declared properties are never routed through __get()/__set(), so `$lead->apiId` reaches the
  * typed property while `$lead->firstName` lands in the ad-hoc bag.
  */
-class Lead implements ProvidesLeadData
+class Lead implements JsonSerializable, ProvidesLeadData
 {
+    /**
+     * @var int Leading/trailing characters of a redacted credential left visible.
+     */
+    private const int REDACT_VISIBLE = 2;
+
     /**
      * @var string|null Overrides the connector's configured API ID when set.
      */
@@ -146,5 +152,43 @@ class Lead implements ProvidesLeadData
         }
 
         return $data;
+    }
+
+    /**
+     * The lead as a plain array, safe to log by default.
+     *
+     * @return array<string, mixed>
+     */
+    public function getArray(bool $redact = true): array
+    {
+        $data = $this->getLeadData();
+
+        if ($redact && isset($data['apiPassword'])) {
+            $data['apiPassword'] = $this->redact((string) $data['apiPassword']);
+        }
+
+        return $data;
+    }
+
+    /**
+     * Mask all but the first and last few characters of a credential.
+     */
+    private function redact(string $value): string
+    {
+        if (mb_strlen($value) <= self::REDACT_VISIBLE * 2) {
+            return str_repeat('*', mb_strlen($value));
+        }
+
+        return mb_substr($value, 0, self::REDACT_VISIBLE)
+            .str_repeat('*', mb_strlen($value) - self::REDACT_VISIBLE * 2)
+            .mb_substr($value, -self::REDACT_VISIBLE);
+    }
+
+    /**
+     * @return array<string, mixed>
+     */
+    public function jsonSerialize(): array
+    {
+        return $this->getArray();
     }
 }

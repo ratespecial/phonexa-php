@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Ratespecial\Phonexa\LmsSync\Models;
 
+use JsonSerializable;
 use PHPUnit\Framework\TestCase;
 use Ratespecial\Phonexa\LmsSync\Contracts\ProvidesLeadData;
 use Ratespecial\Phonexa\LmsSync\Models\Lead;
@@ -137,6 +138,58 @@ class LeadTest extends TestCase
         $this->assertSame(
             ['consentEmailSms', 'incomeNetMonthly'],
             array_keys($lead->getLeadData()),
+        );
+    }
+
+    public function testGetArrayRedactsTheApiPasswordByDefault(): void
+    {
+        $lead = new Lead(['apiId' => 'ACCOUNT', 'apiPassword' => 'super-secret', 'firstName' => 'John']);
+
+        $this->assertSame([
+            'firstName'   => 'John',
+            'apiId'       => 'ACCOUNT',
+            'apiPassword' => 'su********et',
+        ], $lead->getArray());
+    }
+
+    public function testGetArrayReturnsTheRawPasswordWhenRedactionIsDisabled(): void
+    {
+        $lead = new Lead(['apiPassword' => 'super-secret']);
+
+        $this->assertSame('super-secret', $lead->getArray(false)['apiPassword']);
+        $this->assertSame($lead->getLeadData(), $lead->getArray(false));
+    }
+
+    public function testShortPasswordsAreFullyMasked(): void
+    {
+        $lead = new Lead(['apiPassword' => 'abcd']);
+
+        $this->assertSame('****', $lead->getArray()['apiPassword']);
+    }
+
+    public function testGetArrayLeavesEveryOtherFieldAlone(): void
+    {
+        $lead = new Lead([
+            'productId' => 218,
+            'firstName' => 'John',
+            'tPar'      => ['affiliateId' => '123'],
+        ]);
+
+        $data = $lead->getArray();
+
+        $this->assertArrayNotHasKey('apiPassword', $data);
+        $this->assertSame(['firstName' => 'John', 'productId' => 218, 'tPar' => ['affiliateId' => '123']], $data);
+    }
+
+    public function testJsonEncodingUsesTheRedactedArray(): void
+    {
+        $lead = new Lead(['apiPassword' => 'super-secret', 'firstName' => 'John']);
+
+        $this->assertInstanceOf(JsonSerializable::class, $lead);
+        $this->assertSame($lead->getArray(), $lead->jsonSerialize());
+        $this->assertSame(
+            '{"firstName":"John","apiPassword":"su********et"}',
+            json_encode($lead),
         );
     }
 }
