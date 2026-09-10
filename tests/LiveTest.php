@@ -40,15 +40,13 @@ class LiveTest extends TestCase
 
         $connector = new LmsSyncConnector($baseUrl, $apiId, $apiPassword);
 
-        // Belt and braces: the connector flag AND the field on every lead below.
-        $connector->testMode = true;
-
         $this->service   = new LmsSyncService($connector);
         $this->productId = (int) getenv('PHONEXA_LMS_SYNC_PRODUCT_ID');
     }
 
     public function testPostLead(): void
     {
+        $this->service->connector->debug();
         $response = $this->service->postLead($this->testLead());
 
         print_r($response);
@@ -139,7 +137,7 @@ class LiveTest extends TestCase
             'zip'           => '90210',
             'dob'           => '1980-10-21',
             'unsecuredDebt' => 10000,
-            'testMode'      => 1,
+            // 'testMode'      => 1,
         ]);
     }
 }

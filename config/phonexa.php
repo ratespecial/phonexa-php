@@ -2,6 +2,11 @@
 
 declare(strict_types=1);
 
+// Remove trailing /lead
+$url = (string) env('PHONEXA_LMS_SYNC_BASE_URL', '');
+$url = (string) preg_replace('#/lead/*$#', '', $url);
+$url = rtrim($url, '/');
+
 return [
 
     'lms-sync' => [
@@ -11,7 +16,7 @@ return [
          * the API documentation itself is served from.
          * ex: https://leads-inst1-client.phonexa.com
          */
-        'base-url' => env('PHONEXA_LMS_SYNC_BASE_URL', ''),
+        'base-url' => $url,
 
         'api-id'       => env('PHONEXA_LMS_SYNC_API_ID', ''),
         'api-password' => env('PHONEXA_LMS_SYNC_API_PASSWORD', ''),
