@@ -38,9 +38,19 @@ class PhonexaException extends RequestException
             }
 
             foreach ($error as $field => $message) {
-                $parts[] = is_scalar($message) && (string) $message !== ''
-                    ? $field . ': ' . $message
-                    : (string) $field;
+                $text = is_scalar($message) ? (string) $message : '';
+
+                $part = match (true) {
+                    // A bare message list (`[["Current user is disabled. ..."]]`): the index is
+                    // not a field name, so show the message alone.
+                    is_int($field) => $text,
+                    $text !== ''   => $field . ': ' . $text,
+                    default        => (string) $field,
+                };
+
+                if ($part !== '') {
+                    $parts[] = $part;
+                }
             }
         }
 

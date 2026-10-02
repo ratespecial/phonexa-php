@@ -1,0 +1,7 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": "{\"status\":4,\"errors\":[[\"Current user is disabled. Please contact your account manager.\"]]}"
+}

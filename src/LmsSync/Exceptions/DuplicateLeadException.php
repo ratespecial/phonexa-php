@@ -31,27 +31,7 @@ class DuplicateLeadException extends LeadValidationException
      */
     public static function matches(array $errors): bool
     {
-        foreach ($errors as $error) {
-            if (is_string($error) && self::isDuplicateText($error)) {
-                return true;
-            }
-
-            if (! is_array($error)) {
-                continue;
-            }
-
-            foreach ($error as $field => $message) {
-                if (self::isDuplicateText((string) $field)) {
-                    return true;
-                }
-
-                if (is_scalar($message) && self::isDuplicateText((string) $message)) {
-                    return true;
-                }
-            }
-        }
-
-        return false;
+        return self::errorsContain($errors, self::isDuplicateText(...));
     }
 
     protected function buildMessage(string $flattenedErrors): string

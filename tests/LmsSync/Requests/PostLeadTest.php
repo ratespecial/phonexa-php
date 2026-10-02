@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Tests\Ratespecial\Phonexa\LmsSync\Requests;
 
+use Ratespecial\Phonexa\LmsSync\Exceptions\AuthorizationFailedException;
 use Ratespecial\Phonexa\LmsSync\Exceptions\DuplicateLeadException;
 use Ratespecial\Phonexa\LmsSync\Exceptions\LeadValidationException;
+use Ratespecial\Phonexa\LmsSync\Exceptions\UserDisabledException;
 use Ratespecial\Phonexa\LmsSync\LmsSyncService;
 use Ratespecial\Phonexa\LmsSync\Models\Lead;
 use Ratespecial\Phonexa\LmsSync\Requests\PostLead;
@@ -171,6 +173,51 @@ class PostLeadTest extends AbstractTestCase
         $body = json_decode((string) $sent->body(), true, 512, JSON_THROW_ON_ERROR);
 
         return $body;
+    }
+
+    public function testDisabledUserThrowsTheUserDisabledSubclass(): void
+    {
+        $this->connector->withMockClient(new MockClient([
+            PostLead::class => MockResponse::fixture('post-lead-user-disabled'),
+        ]));
+
+        try {
+            (new LmsSyncService($this->connector))->postLead($this->debtLead());
+            $this->fail('Expected a UserDisabledException');
+        } catch (UserDisabledException $e) {
+            $this->assertInstanceOf(LeadValidationException::class, $e);
+            $this->assertSame('Current user is disabled. Please contact your account manager.', $e->getMessage());
+            $this->assertSame([['Current user is disabled. Please contact your account manager.']], $e->getErrors());
+        }
+    }
+
+    public function testRejectedCredentialsThrowTheAuthorizationFailedSubclass(): void
+    {
+        $this->connector->withMockClient(new MockClient([
+            PostLead::class => MockResponse::fixture('post-lead-authorization-failed'),
+        ]));
+
+        try {
+            new LmsSyncService($this->connector)->postLead($this->debtLead());
+            $this->fail('Expected an AuthorizationFailedException');
+        } catch (AuthorizationFailedException $e) {
+            $this->assertSame('Authorization Failed', $e->getMessage());
+            $this->assertSame([['Authorization Failed' => '']], $e->getErrors());
+        }
+    }
+
+    public function testRejectedCredentialsThrowTheAuthorizationFailedSubclass2(): void
+    {
+        $this->connector->withMockClient(new MockClient([
+            PostLead::class => MockResponse::fixture('post-lead-authorization-failed2'),
+        ]));
+
+        try {
+            new LmsSyncService($this->connector)->postLead($this->debtLead());
+            $this->fail('Expected an AuthorizationFailedException');
+        } catch (AuthorizationFailedException $e) {
+            $this->assertNotEmpty($e->getMessage());
+        }
     }
 
     private function debtLead(): Lead

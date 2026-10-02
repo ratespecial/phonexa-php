@@ -155,7 +155,7 @@ Phonexa answers with HTTP 200 whatever happens and reports the result in a `stat
 | 1 | Sold | `$response->isSold()`, with `leadId`, `price` and `redirectUrl` |
 | 2 | Reject | `$response->isRejected()` |
 | 3 | In progress | `$response->isInProgress()` — poll for the outcome |
-| 4 | Validation or auth failure | throws `LeadValidationException`, or `DuplicateLeadException` for a re-post |
+| 4 | Validation or auth failure | throws `LeadValidationException`, narrowed to `DuplicateLeadException`, `UserDisabledException` or `AuthorizationFailedException` where the error text says so |
 | 5 | Unknown lead | throws `LeadNotFoundException` |
 
 A reject means no buyer wanted the lead. That is an ordinary business outcome, so it returns
@@ -198,6 +198,25 @@ try {
     // Already sent — {"status":4,"errors":[{"Duplicate Application":"Duplicate Application"}]}
 } catch (LeadValidationException $e) {
     // Something is actually wrong with the lead.
+}
+```
+
+Account problems arrive the same way, before any field is checked, and fail every lead posted
+with those credentials until they are fixed in Phonexa. Each has its own subclass:
+
+| Exception | Phonexa body |
+|---|---|
+| `UserDisabledException` | `{"status":4,"errors":[["Current user is disabled. Please contact your account manager."]]}` |
+| `AuthorizationFailedException` | `{"status":4,"errors":[{"Authorization Failed":""}]}` (also on status checks) |
+
+```php
+use Ratespecial\Phonexa\LmsSync\Exceptions\AuthorizationFailedException;
+use Ratespecial\Phonexa\LmsSync\Exceptions\UserDisabledException;
+
+try {
+    $service->postLead($lead);
+} catch (UserDisabledException | AuthorizationFailedException $e) {
+    // The credentials are the problem, not the lead -- alert rather than retry.
 }
 ```
 
