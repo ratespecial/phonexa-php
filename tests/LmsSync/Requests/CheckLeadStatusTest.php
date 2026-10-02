@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Tests\Ratespecial\Phonexa\LmsSync\Requests;
 
+use Ratespecial\Phonexa\LmsSync\Exceptions\AuthorizationFailedException;
 use Ratespecial\Phonexa\LmsSync\Exceptions\LeadNotFoundException;
 use Ratespecial\Phonexa\LmsSync\LmsSyncService;
 use Ratespecial\Phonexa\LmsSync\Requests\CheckLeadStatus;
@@ -48,6 +49,14 @@ class CheckLeadStatusTest extends AbstractTestCase
         $this->expectExceptionMessage('Phonexa could not find lead "W_O0QO".');
 
         $this->check('check-lead-status-not-found');
+    }
+
+    public function testRejectedCredentialsThrowTheAuthorizationFailedSubclass(): void
+    {
+        $this->expectException(AuthorizationFailedException::class);
+        $this->expectExceptionMessage('Authorization Failed');
+
+        $this->check('post-lead-authorization-failed');
     }
 
     public function testCheckKeyIsSentInTheBody(): void
