@@ -33,6 +33,8 @@ class AuthorizationFailedExceptionTest extends TestCase
             'ordinary validation'        => [[['email' => 'required']], false],
             'unrelated wording'          => [[['notes' => 'Authorization Failed earlier, retried']], false],
             'extended message'           => [[["Authorization Failed. ApiId and ApiPassword you entered don't match." => '']], true],
+            'extended message as value'  => [[['error' => 'Authorization Failed: credentials rejected']], true],
+            'phrase inside a sentence'   => [[['notes' => 'Your Authorization Failed.']], false],
             'empty'                      => [[], false],
         ];
     }
