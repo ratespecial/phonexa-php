@@ -1,0 +1,7 @@
+{
+    "statusCode": 200,
+    "headers": {
+        "Content-Type": "application/json"
+    },
+    "data": "{\"status\":4,\"errors\":[{\"Authorization Failed. ApiId and ApiPassword you entered don't match.\":\"\"}]}"
+}

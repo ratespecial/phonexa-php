@@ -6,6 +6,7 @@ namespace Tests\Ratespecial\Phonexa;
 
 use PHPUnit\Framework\TestCase;
 use Ratespecial\Phonexa\LmsSync\Contracts\ProvidesLeadData;
+use Ratespecial\Phonexa\LmsSync\Exceptions\AuthorizationFailedException;
 use Ratespecial\Phonexa\LmsSync\LmsSyncConnector;
 use Ratespecial\Phonexa\LmsSync\LmsSyncService;
 use Ratespecial\Phonexa\LmsSync\Models\Lead;
@@ -82,6 +83,17 @@ class LiveTest extends TestCase
         print_r($status);
 
         $this->assertNotSame(0, $status->status);
+    }
+
+    public function testAuthorizationFailed(): void
+    {
+        $this->expectException(AuthorizationFailedException::class);
+
+        $lead              = $this->testLead();
+        $lead->apiId       = 'abc123';
+        $lead->apiPassword = 'something-bogus';
+
+        $this->service->postLead($lead);
     }
 
     /**

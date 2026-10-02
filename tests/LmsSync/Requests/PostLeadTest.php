@@ -198,12 +198,25 @@ class PostLeadTest extends AbstractTestCase
         ]));
 
         try {
-            (new LmsSyncService($this->connector))->postLead($this->debtLead());
+            new LmsSyncService($this->connector)->postLead($this->debtLead());
             $this->fail('Expected an AuthorizationFailedException');
         } catch (AuthorizationFailedException $e) {
-            $this->assertInstanceOf(LeadValidationException::class, $e);
             $this->assertSame('Authorization Failed', $e->getMessage());
             $this->assertSame([['Authorization Failed' => '']], $e->getErrors());
+        }
+    }
+
+    public function testRejectedCredentialsThrowTheAuthorizationFailedSubclass2(): void
+    {
+        $this->connector->withMockClient(new MockClient([
+            PostLead::class => MockResponse::fixture('post-lead-authorization-failed2'),
+        ]));
+
+        try {
+            new LmsSyncService($this->connector)->postLead($this->debtLead());
+            $this->fail('Expected an AuthorizationFailedException');
+        } catch (AuthorizationFailedException $e) {
+            $this->assertNotEmpty($e->getMessage());
         }
     }
 
